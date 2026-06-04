@@ -1,0 +1,35 @@
+!pip install requests ipywidgets
+
+import requests
+import ipywidgets as widgets
+from IPython.display import display
+
+API_KEY = "ca4fb45efc106313a9581af832ba6d10"
+
+city_input = widgets.Text(placeholder="Enter city name", description="City:", layout=widgets.Layout(width="300px"))
+button = widgets.Button(description="Get Weather", button_style="info")
+output = widgets.Output()
+
+def get_weather(b):
+    output.clear_output()
+    city = city_input.value.strip()
+    if not city:
+        with output:
+            print("⚠ Please enter a city name.")
+        return
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+    response = requests.get(url)
+    data = response.json()
+
+    with output:
+        if response.status_code == 200:
+            print(f"📍 City       : {data['name']}")
+            print(f"🌡 Temperature: {data['main']['temp']}°C")
+            print(f"☁  Weather    : {data['weather'][0]['description'].title()}")
+            print(f"💧 Humidity   : {data['main']['humidity']}%")
+        else:
+            print("❌ City not found!")
+
+button.on_click(get_weather)
+display(city_input, button, output)
